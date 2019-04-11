@@ -884,7 +884,7 @@ end
 
 function love.joystickpressed( joystick, button )
 	if modif then
-		if not ppm_set then ppm_set[modif] = {} end
+		if not ppm_set[modif] then ppm_set[modif] = {} end
 		ppm_set[modif].type = "button"
 		ppm_set[modif].value = button
 		ppm_set[modif].joy = getJoyIndex(joystick)
@@ -896,7 +896,7 @@ function love.joystickaxis( joystick, axis, value )
 	if modif then
 		local j,i = findModifAxis(joystick, save)
 		if j then
-			if not ppm_set then ppm_set[modif] = {} end
+			if not ppm_set[modif] then ppm_set[modif] = {} end
 			ppm_set[modif].type = "axis"
 			ppm_set[modif].value = i
 			ppm_set[modif].joy = j
@@ -907,7 +907,7 @@ end
 
 function love.joystickhat( joystick, hat, direction )
 	if modif then
-		if not ppm_set then ppm_set[modif] = {} end
+		if not ppm_set[modif] then ppm_set[modif] = {} end
 		ppm_set[modif].type = "hat"
 		ppm_set[modif].value = hat
 		ppm_set[modif].joy = getJoyIndex(joystick)
