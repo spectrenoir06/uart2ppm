@@ -962,7 +962,7 @@ function ClicksetPPM(mouseX, mouseY, x, y, button, value)
 			modif = value
 			modif_time = 0
 			save = saveAxis()
-		elseif button == 2 then
+		elseif button == 2 and ppm_set[value] then
 			ppm_set[value].reverse = not ppm_set[value].reverse
 		end
 		return true
