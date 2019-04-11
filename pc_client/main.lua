@@ -10,6 +10,8 @@ local fontY = 30
 
 local serial_port = "/dev/ttyUSB0"
 
+local serial_start = false
+
 
 
 function love.load()
@@ -150,12 +152,6 @@ function love.load()
 	update_timer = 0
 	msg_disp = ""
 	love.graphics.setFont(love.graphics.newFont(32))
-
-	sp.open(serial_port);
-	sp.setBaud(sp.B115200);
-
-
-
 
 end
 
@@ -328,7 +324,9 @@ function love.update(dt)
 			end
 		end
 
-		sp.write(struct.pack("hhhhhh", ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]))
+		if serial_start then
+			sp.write(struct.pack("hhhhhh", ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]))
+		end
 		update_timer = 0
 	end
 end
@@ -342,6 +340,7 @@ function love.draw()
 
 	local i = 1
 	drawSerial(0,0)
+	drawSerialStart(300,10)
 	drawPPM(0,60)
 	for k,v in ipairs(joysticks) do
 		-- print(k,v)
@@ -645,6 +644,22 @@ function drawPPMSet(px,py, i)
 	setColor(255,255,255)
 end
 
+function drawSerialStart(px,py)
+	-- print(px,py)
+	if serial_start then
+		setColor(0,255,0)
+	else
+		setColor(255,0,0)
+	end
+	gr.rectangle("fill", px, py, 30, 18)
+	setColor(255,255,255)
+	love.graphics.setFont(min_font)
+	gr.print(serial_start and "Stop" or "Start", px, py + 1)
+	love.graphics.setFont(main_font)
+	gr.rectangle("line", px, py, 30, 18)
+	setColor(255,255,255)
+end
+
 
 function drawPPM(x, y)
 	gr.rectangle("line",x,y, 400, 250)
@@ -940,8 +955,15 @@ function love.mousepressed(x, y, button, isTouch)
 		ClicksetPPM(x,y, 285, 210, button, 4)
 		ClicksetPPM(x,y, 285, 245, button, 5)
 		ClicksetPPM(x,y, 285, 280, button, 6)
-	end
 
+		if ClicksetPPM(x,y,300,10, nil) then
+			local r = sp.open(serial_port)
+			if r then
+				sp.setBaud(sp.B115200)
+				serial_start = true
+			end
+		end
+	end
 end
 
 function mouseSingleInput(mouseX, mouseY, x, y, key)
@@ -976,5 +998,6 @@ function ClicksetPPM(mouseX, mouseY, x, y, button, value)
 		elseif button == 2 then
 			ppm_set[value].reverse = not ppm_set[value].reverse
 		end
+		return true
 	end
 end
