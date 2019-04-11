@@ -93,40 +93,7 @@ function love.load()
 		1500
 	}
 
-	ppm_set = {
-		{
-			type  = "axis",
-			joy   = 1,
-			value = 1
-		},
-		{
-			type  = "axis",
-			joy   = 1,
-			value = 2
-		},
-		{
-			type  = "axis",
-			joy   = 1,
-			value = 4
-		},
-		{
-			type  = "axis",
-			joy   = 1,
-			value = 5
-		},
-		{
-			type  = "button",
-			joy   = 1,
-			value = 1
-		},
-		{
-			type  = "hat",
-			joy   = 1,
-			value = 1,
-			dir = "l"
-		},
-
-	}
+	ppm_set = {}
 
 
 	win={w=gr.getWidth(),h=gr.getHeight()}-- Window.
@@ -632,7 +599,7 @@ end
 
 function drawPPMSet(px,py, i)
 	-- print(px,py)
-	if ppm_set[i].reverse then
+	if ppm_set[i] and ppm_set[i].reverse then
 		setColor(255,0,0)
 		gr.rectangle("fill", px, py, 30, 18)
 	end

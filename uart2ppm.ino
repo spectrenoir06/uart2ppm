@@ -6,12 +6,7 @@
 #define sigPin 12
 #define gndPin 11
 
-// min = 0.600; max = 1.600
-// pulse 0.
-
 uint16_t ppm[CHANNEL_NUMBER];
-
-int currentChannelStep;
 
 void setup(){
 	Serial.begin(115200);
@@ -34,23 +29,14 @@ void setup(){
 	sei();
 }
 
-
-
 void loop(){
-	// for(int i=1200;i<1800;i++) {
-	// 	for(int j=0;j<6;j++)
-	// 		ppm[j] = i;
-	// 	delay(10);
-	// }
-
 	uint8_t pos = 0;
 	if (Serial.available())
 		while (Serial.available())
 			((uint8_t*)ppm)[pos++] = Serial.read();
-
 }
 
-ISR(TIMER1_COMPA_vect){  //leave this alone
+ISR(TIMER1_COMPA_vect){
 	static boolean state = true;
 
 	TCNT1 = 0;
@@ -59,7 +45,7 @@ ISR(TIMER1_COMPA_vect){  //leave this alone
 		digitalWrite(sigPin, onState);
 		OCR1A = PULSE_LENGTH * 2;
 		state = false;
-	} else{  //end pulse and calculate when to start the next pulse
+	} else {  //end pulse and calculate when to start the next pulse
 		static byte cur_chan_numb;
 		static unsigned int calc_rest;
 
@@ -74,7 +60,7 @@ ISR(TIMER1_COMPA_vect){  //leave this alone
 		}
 		else{
 			OCR1A = (ppm[cur_chan_numb] - PULSE_LENGTH) * 2;
-				calc_rest = calc_rest + ppm[cur_chan_numb];
+			calc_rest = calc_rest + ppm[cur_chan_numb];
 			cur_chan_numb++;
 		}
 	}
