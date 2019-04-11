@@ -1,5 +1,10 @@
 local sp = require "serial-port"
-local struct = require "struct"
+pack  = function(format, ...)
+	format = gsub(format, "b", "B")
+	format = gsub(format, "c", "b")
+	return love.data.pack("string", format, ...)
+end
+upack = function(datastring, format) return 0, love.data.unpack(format, datastring) end
 
 local floor = math.floor
 
@@ -292,7 +297,7 @@ function love.update(dt)
 		end
 
 		if serial_start then
-			sp.write(struct.pack("hhhhhh", ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]))
+			sp.write(pack("hhhhhh", ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]))
 		end
 		update_timer = 0
 	end
