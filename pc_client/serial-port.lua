@@ -221,4 +221,3 @@ end
 setmetatable(serialPort, { __index = C })
 
 return serialPort
-
