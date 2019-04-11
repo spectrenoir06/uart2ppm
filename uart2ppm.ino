@@ -31,9 +31,21 @@ void setup(){
 
 void loop(){
 	uint8_t pos = 0;
-	if (Serial.available())
-		while (Serial.available())
-			((uint8_t*)ppm)[pos++] = Serial.read();
+	if (Serial.available()) {
+		while (Serial.available()>0) {
+			uint8_t data = Serial.read();
+			if (data == 42)
+				pos = 0;
+			else if (pos < (6*2) )
+				((uint8_t*)ppm)[pos++] = data;
+		}
+		// Serial.print(ppm[0]);Serial.print(" ");
+		// Serial.print(ppm[1]);Serial.print(" ");
+		// Serial.print(ppm[2]);Serial.print(" ");
+		// Serial.print(ppm[3]);Serial.print(" ");
+		// Serial.print(ppm[4]);Serial.print(" ");
+		// Serial.print(ppm[5]);Serial.println();
+	}
 }
 
 ISR(TIMER1_COMPA_vect){

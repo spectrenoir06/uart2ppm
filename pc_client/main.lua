@@ -1,7 +1,5 @@
 local sp = require "serial-port"
 pack  = function(format, ...)
-	format = gsub(format, "b", "B")
-	format = gsub(format, "c", "b")
 	return love.data.pack("string", format, ...)
 end
 upack = function(datastring, format) return 0, love.data.unpack(format, datastring) end
@@ -297,7 +295,7 @@ function love.update(dt)
 		end
 
 		if serial_start then
-			sp.write(pack("hhhhhh", ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]))
+			sp.write(pack("B<H<H<H<H<H<H",42,ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]))
 		end
 		update_timer = 0
 	end
@@ -320,6 +318,7 @@ function love.draw()
 		drawAxis((400*i), 60, v)
 		drawButton((400*i), 250 + 60,v )
 		drawHat((400*i), 400 + 60, v)
+		drawOrderSet((400*i), 400 + 60 + 70, v)
 		i = i + 1
 	end
 
@@ -738,7 +737,7 @@ end
 function drawHat(x, y, j)
 	j = j and j or current_joy
 	gr.setLineWidth(1)
-	gr.rectangle("line",x,y, 400, 120)
+	gr.rectangle("line",x,y, 400, 70)
 
 
 	local hat_count = j:getHatCount()
@@ -774,6 +773,24 @@ function drawInfo(x, y, j)
 	gr.print("Name: "..j:getName(), x, y)
 	gr.print("GUID: "..j:getGUID(), x, y + 20)
 	gr.print("Vibration Supported: "..(j:isVibrationSupported() and "Yes" or "False"), x, y + 40)
+end
+
+function drawClickButton(x,y,text)
+	setColor(255,255,255)
+	love.graphics.setFont(min_font)
+	gr.print(text, x + 5, y + 1)
+	love.graphics.setFont(main_font)
+	gr.rectangle("line", x, y, 30, 18)
+	setColor(255,255,255)
+end
+
+function drawOrderSet(x, y, j)
+	j = j and j or current_joy
+	gr.setLineWidth(1)
+	gr.rectangle("line",x,y, 400, 70)
+
+	drawClickButton(x + 10,y+10," + ")
+	drawClickButton(x + 60,y+10,"  -")
 end
 
 function drawJoyList(x, y)
@@ -920,7 +937,7 @@ function love.mousepressed(x, y, button, isTouch)
 
 	local px, py = 520, 400
 
-	print(x,y)
+	-- print(x,y)
 
 
 	if not modif then
@@ -931,11 +948,20 @@ function love.mousepressed(x, y, button, isTouch)
 		ClicksetPPM(x,y, 285, 245, button, 5)
 		ClicksetPPM(x,y, 285, 280, button, 6)
 
+		for i=1, #joysticks do
+			ClickOrderSet(x,y,(400*i)+10, 400 + 60 + 70 + 10, button, i, 1)
+		end
+		for i=1, #joysticks do
+			ClickOrderSet(x,y,(400*i)+10 + 60, 400 + 60 + 70 + 10, button, i, -1)
+		end
+
 		if ClicksetPPM(x,y,300,10, nil) then
-			local r = sp.open(serial_port)
-			if r then
-				sp.setBaud(sp.B115200)
-				serial_start = true
+			if not serial_start then
+				local r = sp.open(serial_port)
+				if r then
+					sp.setBaud(sp.B115200)
+					serial_start = true
+				end
 			end
 		end
 	end
@@ -972,6 +998,29 @@ function ClicksetPPM(mouseX, mouseY, x, y, button, value)
 			save = saveAxis()
 		elseif button == 2 and ppm_set[value] then
 			ppm_set[value].reverse = not ppm_set[value].reverse
+		end
+		return true
+	end
+end
+
+function ClickOrderSet(mouseX, mouseY, x, y, button, value, move)
+	if	mouseX >= x
+		and mouseX <= x + 30
+		and mouseY >= y
+		and mouseY <= y + 18
+	then
+		if button == 1 then
+			if move == 1 and value > 1 then
+				local tmp = joysticks[value-1]
+				joysticks[value-1] = joysticks[value]
+				joysticks[value] = tmp
+			elseif move == -1 and value < #joysticks then
+				local tmp = joysticks[value+1]
+				joysticks[value+1] = joysticks[value]
+				joysticks[value] = tmp
+			end
+		elseif button == 2 and ppm_set[value] then
+			-- ppm_set[value].reverse = not ppm_set[value].reverse
 		end
 		return true
 	end
