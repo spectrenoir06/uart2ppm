@@ -29,8 +29,8 @@ void setup(){
 	sei();
 }
 
+uint8_t pos = 0;
 void loop(){
-	uint8_t pos = 0;
 	if (Serial.available()) {
 		while (Serial.available()>0) {
 			uint8_t data = Serial.read();
