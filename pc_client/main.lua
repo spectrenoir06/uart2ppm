@@ -1,5 +1,5 @@
-local sp   = require "serial-port"
-local json = require "json"
+local sp   = require "lib/serial-port"
+local json = require "lib/json"
 
 
 local serial_port = "/dev/ttyUSB0"
@@ -38,6 +38,8 @@ function love.load()
 		v = v:gsub("360_","")
 		gamepadText[v] = gr.newImage("media/360_"..v..".png")
 	end
+
+	avatar = gr.newImage("lib/avatarBig500x500.png")
 
 	gamepadKey = {
 		"a",
@@ -102,12 +104,13 @@ function love.load()
 	--mo.setVisible(false)
 	main_font = gr.newFont(math.floor(15))
 	min_font = gr.newFont(math.floor(12))
+	max_font = gr.newFont(math.floor(28))
 	gr.setFont(main_font)
 
 	current_joy = nil
 
 	gr.setLineStyle("rough")
-	gr.setBackgroundColor(0,31/255,31/255)
+	-- gr.setBackgroundColor(0,31/255,31/255)
 
 	joysticks = {}
 
@@ -326,11 +329,10 @@ function love.draw()
 		i = i + 1
 	end
 
-	if current_joy then
-
-		-- drawGamepad(500 + 20, 10)
-		-- drawGamepadInput(520, 400)
-	end
+	love.graphics.draw(avatar, 80, 310, 0, .5, .5)
+	love.graphics.setFont(max_font)
+	love.graphics.print("Spectre", 145, 550)
+	love.graphics.setFont(main_font)
 
 	if modif then
 		drawPopup(0,0)
