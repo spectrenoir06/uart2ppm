@@ -1,23 +1,22 @@
-local sp = require "serial-port"
-pack  = function(format, ...)
-	return love.data.pack("string", format, ...)
-end
-upack = function(datastring, format) return 0, love.data.unpack(format, datastring) end
+local sp   = require "serial-port"
+local json = require "json"
 
-local floor = math.floor
-
-local data = {}
-
-local font = nil
-local fontY = 30
 
 local serial_port = "/dev/ttyUSB0"
 
+
+local data = {}
+local font = nil
+local fontY = 30
 local serial_start = false
 
+local floor = math.floor
+local pack  = function(format, ...) return love.data.pack("string", format, ...) end
+local upack = function(datastring, format) return 0, love.data.unpack(format, datastring) end
 
 
 function love.load()
+
 	gr=love.graphics
 	kb=love.keyboard
 	mo=love.mouse
@@ -122,6 +121,11 @@ function love.load()
 	update_timer = 0
 	msg_disp = ""
 	love.graphics.setFont(love.graphics.newFont(32))
+
+	local contents = love.filesystem.read( "save.json" )
+	if contents then
+		ppm_set = json.decode(contents)
+	end
 
 end
 
@@ -821,7 +825,6 @@ function love.keypressed(key)
 		if modif then
 			modif = false
 		else
-			-- print(love.joystick.saveGamepadMappings())
 			love.event.quit()
 		end
 	end
@@ -937,9 +940,6 @@ function love.mousepressed(x, y, button, isTouch)
 
 	local px, py = 520, 400
 
-	-- print(x,y)
-
-
 	if not modif then
 		ClicksetPPM(x,y, 285, 105, button, 1)
 		ClicksetPPM(x,y, 285, 140, button, 2)
@@ -1024,4 +1024,9 @@ function ClickOrderSet(mouseX, mouseY, x, y, button, value, move)
 		end
 		return true
 	end
+end
+
+function love.quit()
+	print(json.encode(ppm_set))
+	love.filesystem.write("save.json", json.encode(ppm_set))
 end

@@ -220,4 +220,5 @@ end
 -- add C constants and functions to serialPort object
 setmetatable(serialPort, { __index = C })
 
+
 return serialPort
