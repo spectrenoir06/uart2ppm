@@ -32,4 +32,18 @@ function love.conf(t)
 	t.modules.system = true            -- Enable the system module (boolean)
 	t.modules.timer = true             -- Enable the timer module (boolean)
 	t.modules.window = true            -- Enable the window module (boolean)
+
+	t.releases = {
+		title = "Gamepad to Serial",   -- The project title (string)
+		package = nil,                 -- The project command and package name (string)
+		loveVersion = 11.2,            -- The project LÖVE version
+		version = 1.0,                 -- The project version
+		author = "Spectre",            -- Your name (string)
+		email = "antoine@doussaud.org",-- Your email (string)
+		description = nil,             -- The project description (string)
+		homepage = "antoine.doussaud.org",-- The project homepage (string)
+		identifier = nil,              -- The project Uniform Type Identifier (string)
+		excludeFileList = {},          -- File patterns to exclude. (string list)
+		releaseDirectory = nil,        -- Where to store the project releases (string)
+	}
 end

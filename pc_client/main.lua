@@ -127,7 +127,8 @@ function love.load()
 
 	local contents = love.filesystem.read( "save.json" )
 	if contents then
-		ppm_set = json.decode(contents)
+		ppm_set = json.decode(contents).ppm_set
+		serial_port = json.decode(contents).serial_port
 	end
 
 end
@@ -1029,6 +1030,10 @@ function ClickOrderSet(mouseX, mouseY, x, y, button, value, move)
 end
 
 function love.quit()
-	print(json.encode(ppm_set))
-	love.filesystem.write("save.json", json.encode(ppm_set))
+	local tmp = json.encode({
+		ppm_set = ppm_set,
+		serial_port = serial_port
+	})
+	print(tmp)
+	love.filesystem.write("save.json", tmp)
 end
