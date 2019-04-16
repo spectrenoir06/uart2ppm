@@ -1,8 +1,8 @@
-local sp   = require "lib/serial-port"
+local sp   = require "lib/rs232"
 local json = require "lib/json"
 
 
-local serial_port = "/dev/ttyUSB0"
+local serial_port = "ttyUSB0"
 
 
 local data = {}
@@ -21,6 +21,8 @@ function love.load()
 	kb=love.keyboard
 	mo=love.mouse
 	js=love.joystick
+
+	for k,v in ipairs(sp.ports()) do print(k,v) end
 
 	setColor = function(r,g,b,a)
 		if not a then a = 255 end
@@ -303,7 +305,7 @@ function love.update(dt)
 		end
 
 		if serial_start then
-			sp.write(pack("B<H<H<H<H<H<H",42,ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]))
+			serial_start:write(pack("B<H<H<H<H<H<H",42,ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]), 13)
 		end
 		update_timer = 0
 	end
@@ -960,10 +962,9 @@ function love.mousepressed(x, y, button, isTouch)
 
 		if ClicksetPPM(x,y,300,10, nil) then
 			if not serial_start then
-				local r = sp.open(serial_port)
-				if r then
-					sp.setBaud(sp.B115200)
-					serial_start = true
+				serial_start = sp.open(serial_port, 115200)
+				if not serial_start then
+					print("Can't open:", serial_port)
 				end
 			end
 		end
