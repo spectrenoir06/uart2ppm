@@ -320,6 +320,7 @@ function love.draw()
 
 	local i = 1
 	drawSerial(0,0)
+	drawSerialSet(250,10)
 	drawSerialStart(300,10)
 	drawPPM(0,60)
 	for k,v in ipairs(joysticks) do
@@ -340,6 +341,10 @@ function love.draw()
 	if modif then
 		drawPopup(0,0)
 	end
+
+	if serial_modif then
+		drawPopupSerial(0,0)
+	end
 end
 
 function drawPopup()
@@ -358,6 +363,21 @@ function drawPopup()
 	setColor(50,50,50)
 	-- love.graphics.print(modif_type, x + 20, y + 40)
 	love.graphics.print("for cancel press ESC or wait "..math.ceil(5 - modif_time).." seconds", x + 20, y + 60)
+end
+
+function drawPopupSerial()
+	setColor(0,0,0,230)
+	gr.rectangle("fill",0,0,win.w,win.h)
+	setColor(255,255,255,255)
+	local x = win.w / 2 - 600/2
+	local y = win.h / 2 - 150/2
+	setColor(200,200,200)
+	gr.rectangle("fill", x, y, 600, 150)
+
+	setColor(0,0,0,255)
+	gr.rectangle("line", x, y, 600, 150)
+	setColor(50,50,50)
+	love.graphics.print("Serial port: '"..serial_port.."'", x + 20, y + 20)
 end
 
 function drawIcone(x,y, name)
@@ -640,6 +660,15 @@ function drawSerialStart(px,py)
 	setColor(255,255,255)
 end
 
+function drawSerialSet(px,py)
+	setColor(255,255,255)
+	love.graphics.setFont(min_font)
+	gr.print(" Set", px, py + 1)
+	love.graphics.setFont(main_font)
+	gr.rectangle("line", px, py, 30, 18)
+	setColor(255,255,255)
+end
+
 
 function drawPPM(x, y)
 	gr.rectangle("line",x,y, 400, 250)
@@ -825,7 +854,23 @@ function drawJoyList(x, y)
 	end
 end
 
-function love.keypressed(key)
+function love.textinput(t)
+	if serial_modif then
+		serial_port = serial_port..t
+	end
+end
+
+function love.keypressed(key, scancode, isrepeat)
+
+	if serial_port then
+		if key == "backspace" then
+			serial_port = serial_port:sub(1, -2)
+		end
+		if key == "return" then
+			serial_modif = false
+		end
+	end
+
 	if key=="escape" then
 		if modif then
 			modif = false
@@ -833,28 +878,28 @@ function love.keypressed(key)
 			love.event.quit()
 		end
 	end
-	if key == "up" then
-		local tab = {}
-		local id = 0
-		local i = 1
-		for k,v in ipairs(joysticks) do
-			table.insert(tab, v)
-			if v == current_joy then id = i end
-			i = i + 1
-		end
-		if tab[id - 1] then current_joy = tab[id - 1] end
-	end
-	if key == "down" then
-		local tab = {}
-		local id = 0
-		local i = 1
-		for k,v in ipairs(joysticks) do
-			table.insert(tab, v)
-			if v == current_joy then id = i end
-			i = i + 1
-		end
-		if tab[id + 1] then current_joy = tab[id + 1] end
-	end
+	-- if key == "up" then
+	-- 	local tab = {}
+	-- 	local id = 0
+	-- 	local i = 1
+	-- 	for k,v in ipairs(joysticks) do
+	-- 		table.insert(tab, v)
+	-- 		if v == current_joy then id = i end
+	-- 		i = i + 1
+	-- 	end
+	-- 	if tab[id - 1] then current_joy = tab[id - 1] end
+	-- end
+	-- if key == "down" then
+	-- 	local tab = {}
+	-- 	local id = 0
+	-- 	local i = 1
+	-- 	for k,v in ipairs(joysticks) do
+	-- 		table.insert(tab, v)
+	-- 		if v == current_joy then id = i end
+	-- 		i = i + 1
+	-- 	end
+	-- 	if tab[id + 1] then current_joy = tab[id + 1] end
+	-- end
 
 	-- if key == "r" then
 	-- 	modif = 'a'
@@ -869,17 +914,17 @@ function love.keypressed(key)
 	-- 	print(love.joystick.saveGamepadMappings())
 	-- end
 
-	if key == "r" then
-		current_joy:setVibration( 0, 1, 1)
-	end
+	-- if key == "r" then
+	-- 	current_joy:setVibration( 0, 1, 1)
+	-- end
+	--
+	-- if key == "t" then
+	-- 	current_joy:setVibration( 1, 0, 1 )
+	-- end
 
-	if key == "t" then
-		current_joy:setVibration( 1, 0, 1 )
-	end
-
-	if key == 'i' then
-		print(love.joystick.saveGamepadMappings())
-	end
+	-- if key == 'i' then
+	-- 	print(love.joystick.saveGamepadMappings())
+	-- end
 
 end
 
@@ -967,6 +1012,9 @@ function love.mousepressed(x, y, button, isTouch)
 					print("Can't open:", serial_port)
 				end
 			end
+		end
+		if ClicksetPPM(x,y,250,10, nil) then
+			serial_modif = true
 		end
 	end
 end
