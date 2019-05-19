@@ -250,47 +250,13 @@ elseif jit.os == 'Linux' then
 			CLOCAL, CREAD, CS8
 		)
 		local lflag = bit.bnot(bit.bor(ICANON, ISIG, ECHO))
+
 		config.c_iflag = iflag
-
-		if C.tcsetattr(f.fd, TCSANOW, config) < 0 then
-			f:close()
-			return nil, 'iflag tcsetattr() error'
-		end
-
 		config.c_oflag = oflag
-
-		if C.tcsetattr(f.fd, TCSANOW, config) < 0 then
-			f:close()
-			return nil, 'oflag tcsetattr() error'
-		end
-
 		config.c_cflag = cflag
-
-		if C.tcsetattr(f.fd, TCSANOW, config) < 0 then
-			f:close()
-			return nil, 'cflag tcsetattr() error'
-		end
-
 		config.c_lflag = lflag
-
-		if C.tcsetattr(f.fd, TCSANOW, config) < 0 then
-			f:close()
-			return nil, 'lflag tcsetattr() error'
-		end
-
 		config.c_cc[VTIME] = 1
-
-		if C.tcsetattr(f.fd, TCSANOW, config) < 0 then
-			f:close()
-			return nil, 'c_cc vtime tcsetattr() error'
-		end
-
 		config.c_cc[VMIN]  = 1
-
-		if C.tcsetattr(f.fd, TCSANOW, config) < 0 then
-			f:close()
-			return nil, 'c_cc VMIN tcsetattr() error'
-		end
 
 		local speed = assert(baud_flags[baud_rate], 'invalid baud rate')
 		C.cfsetospeed(config, speed)
