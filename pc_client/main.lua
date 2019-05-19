@@ -333,7 +333,7 @@ function love.draw()
 		i = i + 1
 	end
 
-	love.graphics.draw(avatar, 80, 310, 0, .5, .5)
+	love.graphics.draw(avatar, 80, 320, 0, .5, .5)
 	love.graphics.setFont(max_font)
 	love.graphics.print("Spectre", 145, 550)
 	love.graphics.setFont(main_font)
@@ -1007,9 +1007,11 @@ function love.mousepressed(x, y, button, isTouch)
 
 		if ClicksetPPM(x,y,300,10, nil) then
 			if not serial_start then
-				serial_start = sp.open(serial_port, 115200)
+				serial_start, err = sp.open(serial_port, 115200)
 				if not serial_start then
-					print("Can't open:", serial_port)
+					print("Can't open:", serial_port, err)
+				else
+					print("Open: "..serial_port)
 				end
 			end
 		end
