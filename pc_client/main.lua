@@ -1,6 +1,6 @@
 local sp   = require "lib/rs232"
 local json = require "lib/json"
-
+local utf8 = require("utf8")
 
 local serial_port = "ttyUSB0"
 
@@ -14,6 +14,11 @@ local floor = math.floor
 local pack  = function(format, ...) return love.data.pack("string", format, ...) end
 local upack = function(datastring, format) return 0, love.data.unpack(format, datastring) end
 
+function utf8.sub(s,i,j)
+	i=utf8.offset(s,i)
+	j=utf8.offset(s,j+1)-1
+	return string.sub(s,i,j)
+end
 
 function love.load()
 
@@ -855,6 +860,7 @@ function drawJoyList(x, y)
 end
 
 function love.textinput(t)
+	print("text input",t)
 	if serial_modif then
 		serial_port = serial_port..t
 	end
@@ -862,9 +868,9 @@ end
 
 function love.keypressed(key, scancode, isrepeat)
 
-	if serial_port then
+	if serial_modif then
 		if key == "backspace" then
-			serial_port = serial_port:sub(1, -2)
+			serial_port = utf8.sub(serial_port,1,-2)
 		end
 		if key == "return" then
 			serial_modif = false
