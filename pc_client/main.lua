@@ -104,6 +104,7 @@ function love.load()
 		1500
 	}
 
+
 	ppm_set = {}
 
 
@@ -136,6 +137,11 @@ function love.load()
 	if contents then
 		ppm_set = json.decode(contents).ppm_set
 		serial_port = json.decode(contents).serial_port
+		deadzone = json.decode(contents).deadzone
+	end
+
+	if not deadzone then
+		deadzone = 4
 	end
 
 end
@@ -292,7 +298,11 @@ function love.update(dt)
 
 			if ppm_set[index] and t[ppm_set[index].joy] then
 				if ppm_set[index].type == "axis" then
-					ppm[index] = 500 * (t[ppm_set[index].joy]:getAxis(ppm_set[index].value)*(ppm_set[index].reverse and -1 or 1)) + 1500
+					if math.abs(t[ppm_set[index].joy]:getAxis(ppm_set[index].value)) > (deadzone/100) then
+						ppm[index] = 500 * (t[ppm_set[index].joy]:getAxis(ppm_set[index].value)*(ppm_set[index].reverse and -1 or 1)) + 1500
+					else
+						ppm[index] = 1500
+					end
 				elseif ppm_set[index].type == "button" then
 					if (ppm_set[index].reverse) then
 						ppm[index] = 1000 + ((t[ppm_set[index].joy]:isDown(ppm_set[index].value)) and 0 or 1000)
@@ -1089,7 +1099,8 @@ end
 function love.quit()
 	local tmp = json.encode({
 		ppm_set = ppm_set,
-		serial_port = serial_port
+		serial_port = serial_port,
+		deadzone = deadzone
 	})
 	print(tmp)
 	love.filesystem.write("save.json", tmp)
