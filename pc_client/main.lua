@@ -20,6 +20,10 @@ function utf8.sub(s,i,j)
 	return string.sub(s,i,j)
 end
 
+function map(x, in_min, in_max, out_min, out_max )
+	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+end
+
 function love.load()
 
 	gr=love.graphics
@@ -141,7 +145,10 @@ function love.load()
 	end
 
 	if not deadzone then
-		deadzone = 4
+		deadzone = {
+			off = {0,0,0,0,0,0},
+			size = {0,0,0,0,0,0}
+		}
 	end
 
 end
@@ -298,10 +305,10 @@ function love.update(dt)
 
 			if ppm_set[index] and t[ppm_set[index].joy] then
 				if ppm_set[index].type == "axis" then
-					if math.abs(t[ppm_set[index].joy]:getAxis(ppm_set[index].value)) > (deadzone/100) then
+					if math.abs(t[ppm_set[index].joy]:getAxis(ppm_set[index].value)-deadzone.off[index]) > (deadzone.size[index]/100) then
 						ppm[index] = 500 * (t[ppm_set[index].joy]:getAxis(ppm_set[index].value)*(ppm_set[index].reverse and -1 or 1)) + 1500
 					else
-						ppm[index] = 1500
+						ppm[index] = 500 * deadzone.off[index] + 1500
 					end
 				elseif ppm_set[index].type == "button" then
 					if (ppm_set[index].reverse) then
@@ -710,7 +717,13 @@ function drawPPM(x, y)
 		gr.print(val, px + 150 - min_font:getWidth(val), py + 1)
 		love.graphics.setFont(main_font)
 		gr.rectangle("line", px + 10, py, 250, 18)
-
+		-- love.graphics.line(px+10, py-1, px+10+250, py-1)
+		love.graphics.setColor(1, 1, 0, 1)
+		local l = 250/2 + (deadzone.off[i]*250/2)
+		local s = map(deadzone.size[i],0,100, 0, 250/2)
+		love.graphics.rectangle("fill", px+10+l, py+18, s, 4)--(px+10+l, py, px+10+l, py+18)
+		love.graphics.rectangle("fill", px+10+l, py+18, -s, 4)--(px+10+l, py, px+10+l, py+18)
+		love.graphics.setColor(1, 1, 1, 1)
 		drawPPMSet(px + 270, py, i)
 		love.graphics.setFont(min_font)
 		if ppm_set[i] then
