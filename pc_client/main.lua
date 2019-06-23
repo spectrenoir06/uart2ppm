@@ -144,7 +144,7 @@ function love.load()
 		deadzone = json.decode(contents).deadzone
 	end
 
-	if not deadzone then
+	if not deadzone or type(deadzone) == "number" then
 		deadzone = {
 			off = {0,0,0,0,0,0},
 			size = {0,0,0,0,0,0}
