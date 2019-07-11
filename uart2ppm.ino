@@ -5,14 +5,15 @@
 #define onState 0
 #define sigPin 12
 #define gndPin 11
-#define FRAME_SIZE_RX 6*2+2
+#define ledPin 13
+#define FRAME_SIZE_RX (6*2+2)
 
-uint8_t rx_buffer[6*12+2];
+uint8_t rx_buffer[FRAME_SIZE_RX];
 uint8_t rx_buffer_index = 0;
 
 void push_rx_buffer(uint8_t d) {
 	rx_buffer[rx_buffer_index] = d;
-	rx_buffer_index = ++rx_buffer_index % FRAME_SIZE_RX;
+	rx_buffer_index = (rx_buffer_index+1) % FRAME_SIZE_RX;
 }
 
 uint8_t get_rx_buffer(uint8_t i) {
@@ -21,12 +22,13 @@ uint8_t get_rx_buffer(uint8_t i) {
 
 uint8_t check_rx_buffer() {
 	uint8_t crc = 0;
-	if (get_rx_buffer(0) == 42) {
-		for(uint8_t i=0;i<6*2+1;i++)
-			crc ^= get_rx_buffer(i);
-		return (crc == get_rx_buffer(6*2+1));
+	if (get_rx_buffer(0) == 42 && get_rx_buffer(6*2+1) == 43) {
+		// for(uint8_t i=0;i<6*2+1;i++)
+		// 	crc ^= get_rx_buffer(i);
+		// return (crc == get_rx_buffer(6*2+1));
+		return 1;
 	}
-	return false;
+	return 0;
 }
 
 
@@ -41,6 +43,7 @@ void setup(){
 	pinMode(gndPin, OUTPUT);
 	digitalWrite(sigPin, !onState);
 	digitalWrite(gndPin, LOW);
+	pinMode(ledPin, OUTPUT);
 
 	cli();
 	TCCR1A = 0; // set entire TCCR1 register to 0
@@ -62,30 +65,18 @@ void setup(){
 
 uint8_t pos = 0;
 void loop(){
-
 	if (Serial.available()) {
-		push_rx_buffer(Serial.read());
+		char c = Serial.read();
+		push_rx_buffer(c);
 		if (check_rx_buffer()) {
-			for (int i=0; i< 6*2; i++)
-				ppm[i] = get_rx_buffer(i+1);
+			digitalWrite(ledPin, HIGH);
+			uint8_t *ptr = (uint8_t*)ppm;
+			for (int i=0; i<6*2; i++)
+				ptr[i] = get_rx_buffer(i+1);
 		}
+		else
+			digitalWrite(ledPin, LOW);
 	}
-
-	// if (Serial.available()) {
-	// 	while (Serial.available()>0) {
-	// 		uint8_t data = Serial.read();
-	// 		if (data == 42)
-	// 			pos = 0;
-	// 		else if (pos < (6*2) )
-	// 			((uint8_t*)ppm)[pos++] = data;
-	// 	}
-	// 	// Serial.print(ppm[0]);Serial.print(" ");
-	// 	// Serial.print(ppm[1]);Serial.print(" ");
-	// 	// Serial.print(ppm[2]);Serial.print(" ");
-	// 	// Serial.print(ppm[3]);Serial.print(" ");
-	// 	// Serial.print(ppm[4]);Serial.print(" ");
-	// 	// Serial.print(ppm[5]);Serial.println();
-	// }
 }
 
 ISR(TIMER1_COMPA_vect){

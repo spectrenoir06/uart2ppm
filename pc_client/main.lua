@@ -10,6 +10,8 @@ local font = nil
 local fontY = 30
 local serial_start = false
 
+local fps = 100
+
 local floor = math.floor
 local pack  = function(format, ...) return love.data.pack("string", format, ...) end
 local upack = function(datastring, format) return 0, love.data.unpack(format, datastring) end
@@ -292,7 +294,7 @@ function love.update(dt)
 	end
 	update_timer = update_timer + dt
 
-	if update_timer > 0.020 then -- ( 40Hz = 0.025)
+	if update_timer > 1/fps then -- ( 40Hz = 0.025)
 
 		update_timer = 0
 
@@ -327,7 +329,8 @@ function love.update(dt)
 		end
 
 		if serial_start then
-			serial_start:write(pack("B<H<H<H<H<H<H",42,ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6]), 13)
+			local crc = 43
+			serial_start:write(pack("B<H<H<H<H<H<HB",42,ppm[1],ppm[2],ppm[3],ppm[4],ppm[5],ppm[6], crc), 14)
 		end
 		update_timer = 0
 	end
