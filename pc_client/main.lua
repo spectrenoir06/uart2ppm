@@ -11,7 +11,6 @@ local fontY = 30
 local serial_start = false
 
 local fps = 40
-local lerp_value = 0.6
 
 local floor = math.floor
 local pack  = function(format, ...) return love.data.pack("string", format, ...) end
@@ -150,6 +149,7 @@ function love.load()
 		ppm_set = json.decode(contents).ppm_set
 		serial_port = json.decode(contents).serial_port
 		deadzone = json.decode(contents).deadzone
+		lerp_value = json.decode(contents).lerp_value
 	end
 
 	if not deadzone or type(deadzone) == "number" then
@@ -157,6 +157,10 @@ function love.load()
 			off = {0,0,0,0,0,0},
 			size = {0,0,0,0,0,0}
 		}
+	end
+
+	if not lerp_value then
+		lerp_value = 1
 	end
 
 end
@@ -1122,7 +1126,8 @@ function love.quit()
 	local tmp = json.encode({
 		ppm_set = ppm_set,
 		serial_port = serial_port,
-		deadzone = deadzone
+		deadzone = deadzone,
+		lerp_value = lerp_value
 	})
 	print(tmp)
 	love.filesystem.write("save.json", tmp)
