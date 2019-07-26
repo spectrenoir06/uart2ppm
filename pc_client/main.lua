@@ -10,7 +10,8 @@ local font = nil
 local fontY = 30
 local serial_start = false
 
-local fps = 100
+local fps = 40
+local lerp_value = 0.6
 
 local floor = math.floor
 local pack  = function(format, ...) return love.data.pack("string", format, ...) end
@@ -26,6 +27,10 @@ function map(x, in_min, in_max, out_min, out_max )
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 end
 
+function lerp(a,b,t)
+	return a * (1-t) + b * t
+end
+
 function love.load()
 
 	gr=love.graphics
@@ -39,6 +44,7 @@ function love.load()
 		if not a then a = 255 end
 		gr.setColor(r/255,g/255,b/255,a/255)
 	end
+
 
 	-- love.joystick.loadGamepadMappings("gamecontrollerdb.map")
 
@@ -308,7 +314,7 @@ function love.update(dt)
 			if ppm_set[index] and t[ppm_set[index].joy] then
 				if ppm_set[index].type == "axis" then
 					if math.abs(t[ppm_set[index].joy]:getAxis(ppm_set[index].value)-deadzone.off[index]) > (deadzone.size[index]/100) then
-						ppm[index] = 500 * (t[ppm_set[index].joy]:getAxis(ppm_set[index].value)*(ppm_set[index].reverse and -1 or 1)) + 1500
+						ppm[index] = lerp( ppm[index], 500 * (t[ppm_set[index].joy]:getAxis(ppm_set[index].value)*(ppm_set[index].reverse and -1 or 1)) + 1500, lerp_value)
 					else
 						ppm[index] = 500 * deadzone.off[index] + 1500
 					end
